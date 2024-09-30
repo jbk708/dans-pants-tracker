@@ -32,16 +32,23 @@
             const response = await fetch('status.json');
             const data = await response.json();
             document.getElementById('status').innerText = `Dan is wearing: ${data.status}`;
-        }
+		}
+	async function setStatus(choice) {
+	    const formData = new FormData();
+	    formData.append('status', choice);
 
-        async function setStatus(choice) {
-            const response = await fetch(`set-status.php?status=${choice}`, { method: 'POST' });
-            if (response.ok) {
-                getStatus();
-            } else {
-                alert('Error updating status.');
-            }
-        }
+	    const response = await fetch('set-status.php', {
+		method: 'POST',
+		body: formData
+	    });
+
+	    if (response.ok) {
+		getStatus();
+	    } else {
+		alert('Error updating status.');
+	    }
+	}
+
 
         getStatus();
     </script>
