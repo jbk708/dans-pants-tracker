@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dan's Pants Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 32px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Is Dan Wearing Pants or Shorts?</h1>
+    <p id="status">Loading...</p>
+    
+    <button onclick="setStatus('Pants')">Pants</button>
+    <button onclick="setStatus('Shorts')">Shorts</button>
+
+    <script>
+        async function getStatus() {
+            const response = await fetch('status.json');
+            const data = await response.json();
+            document.getElementById('status').innerText = `Dan is wearing: ${data.status}`;
+        }
+
+        async function setStatus(choice) {
+            const response = await fetch(`set-status.php?status=${choice}`, { method: 'POST' });
+            if (response.ok) {
+                getStatus();
+            } else {
+                alert('Error updating status.');
+            }
+        }
+
+        getStatus();
+    </script>
+</body>
+</html>
+
