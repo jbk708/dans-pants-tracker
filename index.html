@@ -28,28 +28,27 @@
     <button onclick="setStatus('Shorts')">Shorts</button>
 
     <script>
+        async function setStatus(choice) {
+            const response = await fetch('/.netlify/functions/setStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: choice })
+            });
+
+            if (response.ok) {
+                getStatus();
+            } else {
+                alert('Error updating status.');
+            }
+        }
+
         async function getStatus() {
-            const response = await fetch('status.json');
+            const response = await fetch('/.netlify/functions/getStatus');
             const data = await response.json();
             document.getElementById('status').innerText = `Dan is wearing: ${data.status}`;
-		}
-	async function setStatus(choice) {
-	    const formData = new FormData();
-	    formData.append('status', choice);
+        }
 
-	    const response = await fetch('set-status.php', {
-		method: 'POST',
-		body: formData
-	    });
-
-	    if (response.ok) {
-		getStatus();
-	    } else {
-		alert('Error updating status.');
-	    }
-	}
-
-
+        // Fetch current status when page loads
         getStatus();
     </script>
 </body>
