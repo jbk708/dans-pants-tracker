@@ -18,11 +18,23 @@
         h1 {
             font-size: 32px;
         }
+        /* Make the "Dan is Wearing" text larger */
+        #status {
+            font-size: 48px;  /* You can adjust this size */
+            font-weight: bold;
+        }
+        /* Optional: Style the counter */
+        #counter {
+            margin-top: 20px;
+            font-size: 24px;
+            color: gray;
+        }
     </style>
 </head>
 <body>
     <h1>Is Dan Wearing Pants or Shorts?</h1>
-    <p id="status">Loading...</p>
+    <p id="status">Loading...</p>  <!-- Larger text for the status -->
+    <p id="counter">Loading counter...</p>  <!-- Counter for consecutive days -->
     
     <button onclick="setStatus('Pants')">Pants</button>
     <button onclick="setStatus('Shorts')">Shorts</button>
@@ -46,11 +58,11 @@
             const response = await fetch('/.netlify/functions/getStatus');
             const data = await response.json();
             document.getElementById('status').innerText = `Dan is wearing: ${data.status}`;
+            document.getElementById('counter').innerText = `Dan has been wearing ${data.status} for ${data.consecutiveDays} days in a row.`;
         }
 
-        // Fetch current status when page loads
+        // Fetch current status and counter when page loads
         getStatus();
     </script>
 </body>
 </html>
-
