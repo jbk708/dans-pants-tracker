@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 exports.handler = async (event, context) => {
-    const filePath = path.join(__dirname, 'status.json');
+    const filePath = path.join(__dirname, '..', 'status.json');
     
     try {
         const data = fs.readFileSync(filePath, 'utf-8');
