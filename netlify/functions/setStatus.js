@@ -12,7 +12,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const filePath = path.join(__dirname, 'status.json');
+        const filePath = path.join(__dirname, '..', 'status.json');
         const data = JSON.stringify({ status }, null, 2);
 
         try {
