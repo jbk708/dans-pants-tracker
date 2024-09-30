@@ -24,13 +24,14 @@ exports.handler = async (event, context) => {
         const airtableToken = process.env.AIRTABLE_ACCESS_TOKEN;
 
         try {
+            // First, get the current record from Airtable
             const recordResponse = await fetch(airtableUrl, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${airtableToken}` }
             });
 
             if (!recordResponse.ok) {
-                throw new Error('Failed to fetch status from Airtable');
+                throw new Error(`Failed to fetch status from Airtable: ${recordResponse.statusText}`);
             }
 
             const recordData = await recordResponse.json();
@@ -38,19 +39,16 @@ exports.handler = async (event, context) => {
             const lastStatusDate = recordData.fields.LastStatusDate;
             const consecutiveDays = recordData.fields.ConsecutiveDays || 0;
 
-            // If the status hasn't changed, update the days counter
             let newConsecutiveDays = consecutiveDays;
-            let today = new Date().toISOString().split('T')[0];  // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];  // Get today's date in YYYY-MM-DD format
 
             if (status === currentStatus) {
-                // If it's the same status, calculate how many days since the last status date
                 newConsecutiveDays = calculateDaysDifference(lastStatusDate) + 1;
             } else {
-                // If it's a different status, reset the counter
                 newConsecutiveDays = 1;
             }
 
-            // Update Airtable with the new status, last update date, and consecutive days
+            // Update Airtable with the new status and consecutive days
             const updateResponse = await fetch(airtableUrl, {
                 method: 'PATCH',
                 headers: {
@@ -67,7 +65,8 @@ exports.handler = async (event, context) => {
             });
 
             if (!updateResponse.ok) {
-                throw new Error('Failed to update status in Airtable');
+                const errorData = await updateResponse.json();
+                throw new Error(`Failed to update Airtable: ${updateResponse.statusText}. Error details: ${JSON.stringify(errorData)}`);
             }
 
             return {
@@ -75,9 +74,10 @@ exports.handler = async (event, context) => {
                 body: JSON.stringify({ message: `Status updated to: ${status}` }),
             };
         } catch (error) {
+            console.error('Error updating status:', error.message);
             return {
                 statusCode: 500,
-                body: JSON.stringify({ error: 'Failed to update status' }),
+                body: JSON.stringify({ error: error.message }),
             };
         }
     }
@@ -87,3 +87,4 @@ exports.handler = async (event, context) => {
         body: 'Method Not Allowed',
     };
 };
+
