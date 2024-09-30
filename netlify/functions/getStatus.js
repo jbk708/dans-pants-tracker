@@ -18,15 +18,16 @@ exports.handler = async (event, context) => {
 
         const data = await response.json();
         const status = data.fields.Status || 'unknown';
+        const consecutiveDays = data.fields.ConsecutiveDays || 0;
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ status }),
+            body: JSON.stringify({ status, consecutiveDays }),
         };
     } catch (error) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: error.message }),
+            body: JSON.stringify({ error: 'Failed to fetch status' }),
         };
     }
 };
