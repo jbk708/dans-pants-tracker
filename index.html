@@ -7,25 +7,56 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+<style>
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Light mode (default) */
+        :root {
+            --body-bg: #f5f5f0;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --counter-bg: #f3f4f6;
+            --border-color: #f3f4f6;
+            --history-card-bg: #ffffff;
+            --btn-page-bg: #f3f4f6;
+            --btn-page-color: #374151;
+            --btn-page-hover: #e5e7eb;
+        }
+
+        /* Dark mode */
+        body.dark {
+            --body-bg: #1a1a2e;
+            --card-bg: #252540;
+            --text-primary: #f0f0f0;
+            --text-secondary: #d0d0d0;
+            --text-muted: #888899;
+            --counter-bg: #2a2a4e;
+            --border-color: #2a2a4e;
+            --history-card-bg: #252540;
+            --btn-page-bg: #2a2a4e;
+            --btn-page-color: #c0c0d0;
+            --btn-page-hover: #3a3a5e;
+        }
+
         body {
             font-family: 'Inter', system-ui, sans-serif;
-            background: #f5f5f0;
+            background: var(--body-bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
+            transition: background 0.3s ease;
         }
 
         .card {
-            background: #ffffff;
+            background: var(--card-bg);
             border-radius: 24px;
             padding: 56px 48px;
             max-width: 520px;
@@ -35,6 +66,15 @@
                 0 1px 3px rgba(0, 0, 0, 0.04),
                 0 8px 24px rgba(0, 0, 0, 0.06),
                 0 24px 48px rgba(0, 0, 0, 0.04);
+            transition: background 0.3s ease;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .card-title {
@@ -42,24 +82,41 @@
             font-weight: 600;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #9ca3af;
-            margin-bottom: 16px;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .btn-theme {
+            background: var(--btn-page-bg);
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-theme:hover {
+            background: var(--btn-page-hover);
         }
 
         .status-label {
             font-size: 15px;
             font-weight: 500;
-            color: #6b7280;
+            color: var(--text-secondary);
             margin-bottom: 8px;
+            transition: color 0.3s ease;
         }
 
         #status {
             font-size: clamp(36px, 8vw, 56px);
             font-weight: 700;
-            color: #111827;
+            color: var(--text-primary);
             line-height: 1.1;
             margin-bottom: 12px;
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transition: opacity 0.2s ease, transform 0.2s ease, color 0.3s ease;
         }
 
         #status.loading {
@@ -70,17 +127,159 @@
         #counter {
             font-size: 16px;
             font-weight: 500;
-            color: #374151;
-            background: #f3f4f6;
+            color: var(--text-secondary);
+            background: var(--counter-bg);
             border-radius: 100px;
             padding: 8px 20px;
             display: inline-block;
             margin-bottom: 40px;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
         }
 
         #counter.loading {
             opacity: 0;
+        }
+
+        /* Status skeleton for shimmer animation */
+        #status-skeleton {
+            display: none;
+            width: 140px;
+            height: 52px;
+            margin: 0 auto 12px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 8px;
+        }
+
+        #status-skeleton.active {
+            display: block;
+        }
+
+        /* Counter skeleton for shimmer animation */
+        #counter-skeleton {
+            display: none;
+            width: 200px;
+            height: 36px;
+            margin: 0 auto 40px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 100px;
+        }
+
+        #counter-skeleton.active {
+            display: block;
+        }
+
+        /* Shared shimmer animation */
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Pulsing dot spinner for status area */
+        .status-spinner {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .status-spinner.active {
+            display: flex;
+        }
+
+        .status-spinner .dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        .status-spinner .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .status-spinner .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Inline error messages */
+        .inline-error {
+            display: none;
+            font-size: 13px;
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .inline-error.active {
+            display: block;
+        }
+
+        /* History section loading state */
+        .history-skeleton {
+            display: none;
+        }
+
+        .history-skeleton.active {
+            display: block;
+        }
+
+        .history-skeleton li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .history-skeleton li:last-child {
+            border-bottom: none;
+        }
+
+        .history-error {
+            color: #dc2626;
+            font-size: 14px;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .skeleton-bar {
+            height: 14px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 4px;
+        }
+
+        .skeleton-bar.short {
+            width: 60%;
+        }
+
+        .skeleton-bar.medium {
+            width: 80%;
+        }
+
+        .skeleton-bar.full {
+            width: 100%;
         }
 
         .buttons {
@@ -147,6 +346,29 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .btn.saving {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.saving::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            margin: -9px 0 0 -9px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 480px) {
@@ -315,9 +537,18 @@
 <body>
     <div class="card">
         <div class="card-title">Dan's Pants Tracker</div>
+        <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">☾ Dark</button>
         <div class="status-label" id="status-label">Dan is wearing</div>
+        <div class="status-spinner" id="status-spinner">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
         <div id="status" class="loading">—</div>
-        <div id="counter" class="loading">Loading...</div>
+        <div id="status-skeleton" class="skeleton"></div>
+        <div id="counter" class="loading"></div>
+        <div id="counter-skeleton" class="skeleton"></div>
+        <div id="counter-error" class="inline-error"></div>
         <div class="buttons">
             <button class="btn btn-pants" onclick="setStatus('Pants')">Pants</button>
             <button class="btn btn-shorts" onclick="setStatus('Shorts')">Shorts</button>
@@ -351,8 +582,11 @@
         }
 
         async function setStatus(choice) {
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(b => b.disabled = true);
+            const buttons = document.querySelectorAll('.btn-pants, .btn-shorts');
+            buttons.forEach(b => {
+                b.disabled = true;
+                b.classList.add('saving');
+            });
 
             try {
                 await apiCall('/.netlify/functions/setStatus', {
@@ -362,24 +596,39 @@
                 await getStatus();
             } catch (err) {
                 console.error('Error updating status:', err);
-                alert('Failed to update status. Please try again.');
+                showInlineError('counter-error', 'Failed to update status. Please try again.');
             } finally {
-                buttons.forEach(b => b.disabled = false);
+                buttons.forEach(b => {
+                    b.disabled = false;
+                    b.classList.remove('saving');
+                });
             }
         }
 
         async function getStatus() {
             const statusEl = document.getElementById('status');
             const counterEl = document.getElementById('counter');
+            const statusSkeleton = document.getElementById('status-skeleton');
+            const counterSkeleton = document.getElementById('counter-skeleton');
+            const spinner = document.getElementById('status-spinner');
+            const errorEl = document.getElementById('counter-error');
 
-            // Fade out
+            // Show skeleton loaders
+            spinner.classList.add('active');
             statusEl.style.opacity = '0';
             counterEl.style.opacity = '0';
+            errorEl.classList.remove('active');
+            errorEl.textContent = '';
 
             await tick();
 
             try {
                 const data = await apiCall('/.netlify/functions/getStatus');
+
+                // Hide skeleton, show content
+                spinner.classList.remove('active');
+                statusSkeleton.classList.remove('active');
+                counterSkeleton.classList.remove('active');
 
                 statusEl.textContent = data.status;
                 counterEl.textContent = `Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`;
@@ -391,10 +640,51 @@
                 counterEl.style.opacity = '1';
             } catch (err) {
                 console.error('Error fetching status:', err);
-                statusEl.textContent = 'Error';
+                spinner.classList.remove('active');
+                statusSkeleton.classList.remove('active');
+                counterSkeleton.classList.remove('active');
+
+                statusEl.textContent = '—';
                 statusEl.classList.remove('loading');
-                counterEl.textContent = 'Could not load status.';
+                statusEl.style.opacity = '1';
+
+                counterEl.textContent = '';
                 counterEl.classList.remove('loading');
+                counterEl.style.opacity = '1';
+
+                showInlineError('counter-error', 'Could not load status. Please refresh to try again.');
+            }
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+        }
+
+        function initTheme() {
+            const stored = localStorage.getItem('theme');
+            if (stored === 'dark' || stored === 'light') {
+                applyTheme(stored);
+                return;
+            }
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                applyTheme('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark');
+            if (isDark) {
+                document.body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-toggle').textContent = '☾ Dark';
+            } else {
+                document.body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-toggle').textContent = '☀ Light';
             }
         }
 
@@ -402,7 +692,24 @@
             return new Promise(resolve => setTimeout(resolve, 180));
         }
 
+        function showInlineError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('active');
+            }
+        }
+
+        function hideInlineError(elementId) {
+            const errorEl = document.getElementById(elementId);
+            if (errorEl) {
+                errorEl.classList.remove('active');
+                errorEl.textContent = '';
+            }
+        }
+
         // Load current status on page mount
+        initTheme();
         getStatus();
 
         // History state
@@ -436,7 +743,15 @@
             const pageInfo = document.getElementById('page-info');
 
             historyPage = page;
-            listEl.innerHTML = '<li class="history-loading">Loading...</li>';
+
+            // Show skeleton loading
+            listEl.innerHTML = `
+                <li class="history-skeleton active"><div class="skeleton-bar medium"></div></li>
+                <li class="history-skeleton active"><div class="skeleton-bar full"></div></li>
+                <li class="history-skeleton active"><div class="skeleton-bar short"></div></li>
+                <li class="history-skeleton active"><div class="skeleton-bar medium"></div></li>
+                <li class="history-skeleton active"><div class="skeleton-bar full"></div></li>
+            `;
             prevBtn.disabled = true;
             nextBtn.disabled = true;
             pageInfo.textContent = '';
@@ -472,7 +787,7 @@
                 pageInfo.textContent = `Page ${page} of ${totalPages}`;
             } catch (err) {
                 console.error('Error fetching history:', err);
-                listEl.innerHTML = '<li class="history-empty">Failed to load history</li>';
+                listEl.innerHTML = '<li class="history-error">Failed to load history. Try again.</li>';
             }
         }
 
