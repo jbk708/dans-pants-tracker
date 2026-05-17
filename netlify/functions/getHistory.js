@@ -1,5 +1,42 @@
 const db = require('../../lib/db');
 
+/**
+ * @typedef {Object} NetlifyALBEvent
+ * @property {string} httpMethod
+ * @property {string | null} body
+ * @property {{ limit?: string, page?: string } | null} queryStringParameters
+ * @property {string} path
+ * @property {Record<string, string>} headers
+ */
+
+/**
+ * @typedef {Object} StatusResponse
+ * @property {number} statusCode
+ * @property {Record<string, string>} headers
+ * @property {string} body
+ */
+
+/**
+ * @typedef {Object} GetHistoryRow
+ * @property {number} id
+ * @property {string} user_id
+ * @property {string} status
+ * @property {string} changed_at
+ */
+
+/**
+ * @typedef {Object} GetHistoryResult
+ * @property {number} page
+ * @property {number} limit
+ * @property {GetHistoryRow[]} rows
+ */
+
+/**
+ * GET / — Returns paginated status-change history.
+ *
+ * @param {NetlifyALBEvent} event
+ * @returns {Promise<StatusResponse>}
+ */
 exports.handler = async (event, context) => {
     // Handle CORS preflight
     if (event.httpMethod === 'OPTIONS') {

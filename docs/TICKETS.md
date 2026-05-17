@@ -58,8 +58,8 @@
 - **T-10:** Type safety for Netlify functions
   Add JSDoc or migrate functions to TypeScript. Type the request/response shapes.
 
-- **T-11:** Remove dead code and old Airtable artifacts
-  Any leftover airtable config, old env var names, or migration scripts that are no longer needed.
+- ~~**T-11:** Remove dead code and old Airtable artifacts — done (audit by Hermes, see summary)~~
+  All Airtable artifacts cleaned: package.json and package-lock.json are airtable-free, no AIRTABLE env vars in any source file, netlify.toml has no airtable config, no .env/.env.example files present, no migration scripts, node_modules/airtable/ removed from disk and staged for deletion in git.
 
 ### Documentation
 
