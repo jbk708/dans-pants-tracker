@@ -1,90 +1,61 @@
-const fetch = require('node-fetch');
-
-// Helper function to calculate the difference in days between two dates
-function calculateDaysDifference(startDate) {
-    const today = new Date();
-    const start = new Date(startDate);
-    const differenceInTime = today.getTime() - start.getTime();
-    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-    return differenceInDays;
-}
+const db = require('../../lib/db');
 
 exports.handler = async (event, context) => {
-    if (event.httpMethod === 'POST') {
-        const { status } = JSON.parse(event.body);
-
-        if (status !== 'Pants' && status !== 'Shorts') {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Invalid status' }),
-            };
-        }
-
-        const airtableUrl = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Status/${process.env.AIRTABLE_RECORD_ID}`;
-        const airtableToken = process.env.AIRTABLE_ACCESS_TOKEN;
-
-        try {
-            // First, get the current record from Airtable
-            const recordResponse = await fetch(airtableUrl, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${airtableToken}` }
-            });
-
-            if (!recordResponse.ok) {
-                throw new Error(`Failed to fetch status from Airtable: ${recordResponse.statusText}`);
-            }
-
-            const recordData = await recordResponse.json();
-            const currentStatus = recordData.fields.Status;
-            const lastStatusDate = recordData.fields.LastStatusDate;
-            const consecutiveDays = recordData.fields.ConsecutiveDays || 0;
-
-            let newConsecutiveDays = consecutiveDays;
-            const today = new Date().toISOString().split('T')[0];  // Get today's date in YYYY-MM-DD format
-
-            if (status === currentStatus) {
-                newConsecutiveDays = calculateDaysDifference(lastStatusDate) + 1;
-            } else {
-                newConsecutiveDays = 1;
-            }
-
-            // Update Airtable with the new status and consecutive days
-            const updateResponse = await fetch(airtableUrl, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${airtableToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    fields: {
-                        Status: status,
-                        LastStatusDate: today,
-                        ConsecutiveDays: newConsecutiveDays
-                    }
-                })
-            });
-
-            if (!updateResponse.ok) {
-                const errorData = await updateResponse.json();
-                throw new Error(`Failed to update Airtable: ${updateResponse.statusText}. Error details: ${JSON.stringify(errorData)}`);
-            }
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ message: `Status updated to: ${status}` }),
-            };
-        } catch (error) {
-            console.error('Error updating status:', error.message);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: error.message }),
-            };
-        }
+    // Handle CORS preflight
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+            body: '',
+        };
     }
 
-    return {
-        statusCode: 405,
-        body: 'Method Not Allowed',
-    };
-};
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: 'Method Not Allowed' }),
+        };
+    }
 
+    // Parse and validate input
+    let body;
+    try {
+        body = JSON.parse(event.body || '{}');
+    } catch {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Invalid JSON body' }),
+        };
+    }
+
+    const { status } = body;
+    if (!status) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Missing required field: status' }),
+        };
+    }
+
+    try {
+        const result = db.updateStatus(status);
+        return {
+            statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(result),
+        };
+    } catch (error) {
+        // Validation errors → 400, everything else → 500
+        const isValidation = error.message.startsWith('Invalid status');
+        console.error('Error in setStatus:', error.message);
+        return {
+            statusCode: isValidation ? 400 : 500,
+            body: JSON.stringify({ error: error.message }),
+        };
+    }
+};
