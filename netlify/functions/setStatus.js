@@ -40,7 +40,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const result = db.updateStatus(status);
+        const result = await db.updateStatus(status);
         return {
             statusCode: 200,
             headers: {

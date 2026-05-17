@@ -13,7 +13,6 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Only allow GET
     if (event.httpMethod !== 'GET') {
         return {
             statusCode: 405,
@@ -23,7 +22,7 @@ exports.handler = async (event, context) => {
 
     try {
         // refreshStreak handles day-rollover: bumps consecutive_days if it's a new day
-        const result = db.refreshStreak();
+        const result = await db.refreshStreak();
 
         return {
             statusCode: 200,

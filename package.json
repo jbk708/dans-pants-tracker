@@ -4,16 +4,16 @@
   "description": "Asking the important questions, such as if Dan is wearing pants or shorts today.",
   "main": "index.js",
   "scripts": {
-    "db:init": "node -e \"const db = require('./lib/db'); db.getDb(); console.log('DB initialized at data/tracker.db');\"",
+    "db:init": "node -e \"const db = require('./lib/db'); db.getClient().then(() => console.log('DB initialized')).catch(e => console.error(e));\"",
     "dev": "netlify dev",
-    "test": "echo \\\"No tests yet\\\""
+    "test": "echo \"No tests yet\""
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0"
+    "@libsql/client": "^0.14.0"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"
   },
-  "keywords": ["pants", "tracker", "netlify"],
+  "keywords": ["pants", "tracker", "netlify", "turso"],
   "license": "MIT"
 }
