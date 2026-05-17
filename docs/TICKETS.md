@@ -32,10 +32,10 @@
 
 ### UX Improvements
 
-- **T-05:** Dark mode
+- ~~**T-05:** Dark mode — PR #6~~
   System-preference-aware dark/light theme toggle. Persist preference in localStorage.
 
-- **T-06:** Better loading and error states
+- ~~**T-06:** Better loading and error states — PR #6~~
   Skeleton or spinner while fetching. Clear error messages on failure (no more raw "Failed to fetch status").
 
 ### New Features
