@@ -1,5 +1,32 @@
 const db = require('../../lib/db');
 
+/**
+ * @typedef {Object} NetlifyALBEvent
+ * @property {string} httpMethod
+ * @property {string | null} body
+ * @property {{ limit?: string, page?: string } | null} queryStringParameters
+ * @property {string} path
+ * @property {Record<string, string>} headers
+ */
+
+/**
+ * @typedef {Object} StatusResponse
+ * @property {number} statusCode
+ * @property {Record<string, string>} headers
+ * @property {string} body
+ */
+
+/**
+ * @typedef {Object} SetStatusBody
+ * @property {'Pants' | 'Shorts'} status
+ */
+
+/**
+ * POST / — Updates the pants/shorts status.
+ *
+ * @param {NetlifyALBEvent} event
+ * @returns {Promise<StatusResponse>}
+ */
 exports.handler = async (event, context) => {
     // Handle CORS preflight
     if (event.httpMethod === 'OPTIONS') {
