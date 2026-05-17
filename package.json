@@ -1,5 +1,19 @@
 {
+  "name": "dans-pants-tracker",
+  "version": "1.0.0",
+  "description": "Asking the important questions, such as if Dan is wearing pants or shorts today.",
+  "main": "index.js",
+  "scripts": {
+    "db:init": "node -e \"const db = require('./lib/db'); db.getClient().then(() => console.log('DB initialized')).catch(e => console.error(e));\"",
+    "dev": "netlify dev",
+    "test": "echo \"No tests yet\""
+  },
   "dependencies": {
-    "airtable": "^0.12.2"
-  }
+    "@libsql/client": "^0.14.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": ["pants", "tracker", "netlify", "turso"],
+  "license": "MIT"
 }
