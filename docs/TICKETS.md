@@ -52,18 +52,16 @@
 
 ### Quality
 
-- **T-09:** Add unit tests
+- ~~**T-09:** Add unit tests — PR #8~~
   Test db.js validation logic and streak refresh behavior. Can use Vitest or Jest.
 
-- **T-10:** Type safety for Netlify functions
+- ~~**T-10:** Type safety for Netlify functions — PR #8~~
   Add JSDoc or migrate functions to TypeScript. Type the request/response shapes.
 
-- ~~**T-11:** Remove dead code and old Airtable artifacts — done (audit by Hermes, see summary)~~
-  All Airtable artifacts cleaned: package.json and package-lock.json are airtable-free, no AIRTABLE env vars in any source file, netlify.toml has no airtable config, no .env/.env.example files present, no migration scripts, node_modules/airtable/ removed from disk and staged for deletion in git.
+- ~~**T-11:** Remove dead code and old Airtable artifacts — PR #8~~
+  Any leftover airtable config, old env var names, or migration scripts that are no longer needed.
 
-### Documentation
-
-- **T-12:** Update README
+- ~~**T-12:** Update README — PR #8~~
   Reflect Turso migration, required env vars, and local dev setup steps.
 
 ---
