@@ -18,12 +18,12 @@
 - ~~**T-02:** Add visual feedback — PR #3~~
   Animate status transitions. Button press effects and hover states. Smooth fade or scale on state change.
 
-- **T-03:** Mobile responsiveness
+- ~~**T-03:** Mobile responsiveness — PR #4~~
   Buttons and text readable on small screens. Touch-friendly tap targets.
 
 ### Core Features
 
-- **T-04:** Status history view
+- ~~**T-04:** Status history view — PR #5~~
   Paginated list of past status changes — who, what, when. Fetch via a new GET /history endpoint.
 
 ---
