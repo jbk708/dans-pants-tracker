@@ -185,6 +185,131 @@
                 gap: 12px;
             }
         }
+
+        /* History Section */
+        .history-toggle {
+            margin-top: 24px;
+        }
+
+        .btn-history {
+            background: #6b7280;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
+        }
+
+        .btn-history:hover {
+            background: #4b5563;
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-history.active {
+            background: #374151;
+        }
+
+        .history-panel {
+            margin-top: 24px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .history-panel.open {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .history-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.04),
+                0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .history-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 16px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .history-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .history-list li:last-child {
+            border-bottom: none;
+        }
+
+        .history-list .status {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .history-empty {
+            color: #9ca3af;
+            font-size: 14px;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .history-loading {
+            color: #9ca3af;
+            font-size: 14px;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn-page {
+            flex: 1;
+            padding: 10px 16px;
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #f3f4f6;
+            color: #374151;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            background: #e5e7eb;
+            transform: scale(0.98);
+        }
+
+        .btn-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            padding: 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +321,22 @@
         <div class="buttons">
             <button class="btn btn-pants" onclick="setStatus('Pants')">Pants</button>
             <button class="btn btn-shorts" onclick="setStatus('Shorts')">Shorts</button>
+        </div>
+        <div class="history-toggle">
+            <button class="btn btn-history" id="history-toggle" onclick="toggleHistory()">Show History</button>
+        </div>
+        <div class="history-panel" id="history-panel">
+            <div class="history-card">
+                <div class="history-title">Status History</div>
+                <ul class="history-list" id="history-list">
+                    <li class="history-loading">Loading...</li>
+                </ul>
+                <div class="page-info" id="page-info"></div>
+                <div class="pagination">
+                    <button class="btn-page" id="btn-prev" onclick="prevPage()">Previous</button>
+                    <button class="btn-page" id="btn-next" onclick="nextPage()">Next</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -263,6 +404,87 @@
 
         // Load current status on page mount
         getStatus();
+
+        // History state
+        let historyPage = 1;
+        let historyOpen = false;
+
+        function toggleHistory() {
+            const panel = document.getElementById('history-panel');
+            const toggle = document.getElementById('history-toggle');
+            historyOpen = !historyOpen;
+
+            if (historyOpen) {
+                panel.classList.add('open');
+                toggle.classList.add('active');
+                toggle.textContent = 'Hide History';
+                if (document.getElementById('history-list').children.length === 0 ||
+                    document.getElementById('history-list').querySelector('.history-loading')) {
+                    fetchHistory(1);
+                }
+            } else {
+                panel.classList.remove('open');
+                toggle.classList.remove('active');
+                toggle.textContent = 'Show History';
+            }
+        }
+
+        async function fetchHistory(page) {
+            const listEl = document.getElementById('history-list');
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+            const pageInfo = document.getElementById('page-info');
+
+            historyPage = page;
+            listEl.innerHTML = '<li class="history-loading">Loading...</li>';
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            pageInfo.textContent = '';
+
+            try {
+                const data = await apiCall(`/.netlify/functions/getHistory?page=${page}&limit=20`);
+                listEl.innerHTML = '';
+
+                if (!data.history || data.history.length === 0) {
+                    listEl.innerHTML = '<li class="history-empty">No history yet</li>';
+                    prevBtn.disabled = page > 1;
+                    nextBtn.disabled = true;
+                    pageInfo.textContent = 'Page 1 of 1';
+                    return;
+                }
+
+                data.history.forEach(item => {
+                    const date = new Date(item.changed_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="status">${item.status}</span> on ${date}`;
+                    listEl.appendChild(li);
+                });
+
+                const totalPages = data.totalPages || 1;
+                prevBtn.disabled = page <= 1;
+                nextBtn.disabled = page >= totalPages;
+                pageInfo.textContent = `Page ${page} of ${totalPages}`;
+            } catch (err) {
+                console.error('Error fetching history:', err);
+                listEl.innerHTML = '<li class="history-empty">Failed to load history</li>';
+            }
+        }
+
+        function prevPage() {
+            if (historyPage > 1) {
+                fetchHistory(historyPage - 1);
+            }
+        }
+
+        function nextPage() {
+            fetchHistory(historyPage + 1);
+        }
     </script>
 </body>
 </html>
