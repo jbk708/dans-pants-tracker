@@ -12,7 +12,7 @@
 
 ### UI Overhaul
 
-- **T-01:** Redesign index.html
+- ~~**T-01:** Redesign index.html — PR #3~~
   Replace minimal inline styles with a clean, modern UI. Larger status text, better fonts, subtle shadows and spacing.
 
 - **T-02:** Add visual feedback
