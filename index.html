@@ -86,6 +86,31 @@
             transition: color 0.3s ease;
         }
 
+        /* User name input */
+        #user-name {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: var(--counter-bg);
+            border: 1px solid transparent;
+            border-radius: 20px;
+            padding: 4px 12px;
+            width: 120px;
+            text-align: center;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #user-name::placeholder {
+            color: var(--text-muted);
+        }
+
+        #user-name:focus {
+            outline: none;
+            border-color: #6b7280;
+            box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.15);
+        }
+
         .btn-theme {
             background: var(--btn-page-bg);
             color: var(--text-secondary);
@@ -138,6 +163,37 @@
 
         #counter.loading {
             opacity: 0;
+        }
+
+        #streak {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: var(--counter-bg);
+            border-radius: 100px;
+            padding: 6px 16px;
+            display: inline-block;
+            margin-bottom: 32px;
+            transition: opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
+        }
+
+        #streak.loading {
+            opacity: 0;
+        }
+
+        #streak-skeleton {
+            display: none;
+            width: 120px;
+            height: 30px;
+            margin: 0 auto 32px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 100px;
+        }
+
+        #streak-skeleton.active {
+            display: block;
         }
 
         /* Status skeleton for shimmer animation */
@@ -536,9 +592,11 @@
 </head>
 <body>
     <div class="card">
-        <div class="card-title">Dan's Pants Tracker</div>
+        <div class="card-header">
+            <div class="card-title">Dan's Pants Tracker</div>
+            <input type="text" id="user-name" placeholder="Your name" maxlength="30" autocomplete="off">
+        </div>
         <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">☾ Dark</button>
-        <div class="status-label" id="status-label">Dan is wearing</div>
         <div class="status-spinner" id="status-spinner">
             <span class="dot"></span>
             <span class="dot"></span>
@@ -548,6 +606,8 @@
         <div id="status-skeleton" class="skeleton"></div>
         <div id="counter" class="loading"></div>
         <div id="counter-skeleton" class="skeleton"></div>
+        <div id="streak" class="loading"></div>
+        <div id="streak-skeleton" class="skeleton"></div>
         <div id="counter-error" class="inline-error"></div>
         <div class="buttons">
             <button class="btn btn-pants" onclick="setStatus('Pants')">Pants</button>
@@ -588,10 +648,12 @@
                 b.classList.add('saving');
             });
 
+            const userId = localStorage.getItem('userName') || 'default';
+
             try {
                 await apiCall('/.netlify/functions/setStatus', {
                     method: 'POST',
-                    body: JSON.stringify({ status: choice }),
+                    body: JSON.stringify({ status: choice, userId }),
                 });
                 await getStatus();
             } catch (err) {
@@ -608,8 +670,10 @@
         async function getStatus() {
             const statusEl = document.getElementById('status');
             const counterEl = document.getElementById('counter');
+            const streakEl = document.getElementById('streak');
             const statusSkeleton = document.getElementById('status-skeleton');
             const counterSkeleton = document.getElementById('counter-skeleton');
+            const streakSkeleton = document.getElementById('streak-skeleton');
             const spinner = document.getElementById('status-spinner');
             const errorEl = document.getElementById('counter-error');
 
@@ -617,6 +681,7 @@
             spinner.classList.add('active');
             statusEl.style.opacity = '0';
             counterEl.style.opacity = '0';
+            streakEl.style.opacity = '0';
             errorEl.classList.remove('active');
             errorEl.textContent = '';
 
@@ -629,20 +694,28 @@
                 spinner.classList.remove('active');
                 statusSkeleton.classList.remove('active');
                 counterSkeleton.classList.remove('active');
+                streakSkeleton.classList.remove('active');
 
                 statusEl.textContent = data.status;
-                counterEl.textContent = `Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`;
+                const userName = localStorage.getItem('userName') || '';
+                counterEl.textContent = userName
+                    ? `${userName}: Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`
+                    : `Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`;
+                streakEl.textContent = `🔥 ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} streak`;
 
                 // Fade in
                 statusEl.classList.remove('loading');
                 counterEl.classList.remove('loading');
+                streakEl.classList.remove('loading');
                 statusEl.style.opacity = '1';
                 counterEl.style.opacity = '1';
+                streakEl.style.opacity = '1';
             } catch (err) {
                 console.error('Error fetching status:', err);
                 spinner.classList.remove('active');
                 statusSkeleton.classList.remove('active');
                 counterSkeleton.classList.remove('active');
+                streakSkeleton.classList.remove('active');
 
                 statusEl.textContent = '—';
                 statusEl.classList.remove('loading');
@@ -651,6 +724,10 @@
                 counterEl.textContent = '';
                 counterEl.classList.remove('loading');
                 counterEl.style.opacity = '1';
+
+                streakEl.textContent = '';
+                streakEl.classList.remove('loading');
+                streakEl.style.opacity = '1';
 
                 showInlineError('counter-error', 'Could not load status. Please refresh to try again.');
             }
@@ -710,7 +787,19 @@
 
         // Load current status on page mount
         initTheme();
+        initUserName();
         getStatus();
+
+        // ── User name ──────────────────────────────────────────────────────────
+        function initUserName() {
+            const input = document.getElementById('user-name');
+            const stored = localStorage.getItem('userName');
+            if (stored) input.value = stored;
+
+            input.addEventListener('input', () => {
+                localStorage.setItem('userName', input.value.trim());
+            });
+        }
 
         // History state
         let historyPage = 1;
