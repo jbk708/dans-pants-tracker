@@ -4,64 +4,245 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dan's Pants Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f5f5f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 56px 48px;
+            max-width: 520px;
+            width: 100%;
             text-align: center;
-            margin-top: 100px;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.04),
+                0 8px 24px rgba(0, 0, 0, 0.06),
+                0 24px 48px rgba(0, 0, 0, 0.04);
         }
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
-            margin: 20px;
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 16px;
         }
-        h1 {
-            font-size: 32px;
+
+        .status-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
-        /* Make the "Dan is Wearing" text larger */
+
         #status {
-            font-size: 48px;  /* You can adjust this size */
-            font-weight: bold;
+            font-size: clamp(36px, 8vw, 56px);
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        /* Optional: Style the counter */
+
+        #status.loading {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
         #counter {
-            margin-top: 20px;
-            font-size: 24px;
-            color: gray;
+            font-size: 16px;
+            font-weight: 500;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 100px;
+            padding: 8px 20px;
+            display: inline-block;
+            margin-bottom: 40px;
+            transition: opacity 0.2s ease;
+        }
+
+        #counter.loading {
+            opacity: 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 16px 24px;
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition:
+                transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.15s ease,
+                background-color 0.15s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            transition: background 0.15s ease;
+            border-radius: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.96) translateY(2px);
+        }
+
+        .btn-pants {
+            background: #1a1a2e;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(26, 26, 46, 0.25);
+        }
+
+        .btn-pants:hover {
+            background: #2a2a4e;
+            box-shadow: 0 6px 20px rgba(26, 26, 46, 0.3);
+        }
+
+        .btn-shorts {
+            background: #f97316;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-shorts:hover {
+            background: #ea580c;
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 40px 28px;
+                border-radius: 20px;
+            }
+
+            .btn {
+                min-width: 0;
+                padding: 14px 20px;
+                font-size: 16px;
+                border-radius: 14px;
+            }
+
+            .buttons {
+                gap: 12px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Is Dan Wearing Pants or Shorts?</h1>
-    <p id="status">Loading...</p>  <!-- Larger text for the status -->
-    <p id="counter">Loading counter...</p>  <!-- Counter for consecutive days -->
-    
-    <button onclick="setStatus('Pants')">Pants</button>
-    <button onclick="setStatus('Shorts')">Shorts</button>
+    <div class="card">
+        <div class="card-title">Dan's Pants Tracker</div>
+        <div class="status-label" id="status-label">Dan is wearing</div>
+        <div id="status" class="loading">—</div>
+        <div id="counter" class="loading">Loading...</div>
+        <div class="buttons">
+            <button class="btn btn-pants" onclick="setStatus('Pants')">Pants</button>
+            <button class="btn btn-shorts" onclick="setStatus('Shorts')">Shorts</button>
+        </div>
+    </div>
 
     <script>
-        async function setStatus(choice) {
-            const response = await fetch('/.netlify/functions/setStatus', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: choice })
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(endpoint, {
+                headers: { 'Content-Type': 'application/json', ...options.headers },
+                ...options,
             });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        }
 
-            if (response.ok) {
-                getStatus();
-            } else {
-                alert('Error updating status.');
+        async function setStatus(choice) {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(b => b.disabled = true);
+
+            try {
+                await apiCall('/.netlify/functions/setStatus', {
+                    method: 'POST',
+                    body: JSON.stringify({ status: choice }),
+                });
+                await getStatus();
+            } catch (err) {
+                console.error('Error updating status:', err);
+                alert('Failed to update status. Please try again.');
+            } finally {
+                buttons.forEach(b => b.disabled = false);
             }
         }
 
         async function getStatus() {
-            const response = await fetch('/.netlify/functions/getStatus');
-            const data = await response.json();
-            document.getElementById('status').innerText = `Dan is wearing: ${data.status}`;
-            document.getElementById('counter').innerText = `Dan has been wearing ${data.status} for ${data.consecutiveDays} days in a row.`;
+            const statusEl = document.getElementById('status');
+            const counterEl = document.getElementById('counter');
+
+            // Fade out
+            statusEl.style.opacity = '0';
+            counterEl.style.opacity = '0';
+
+            await tick();
+
+            try {
+                const data = await apiCall('/.netlify/functions/getStatus');
+
+                statusEl.textContent = data.status;
+                counterEl.textContent = `Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`;
+
+                // Fade in
+                statusEl.classList.remove('loading');
+                counterEl.classList.remove('loading');
+                statusEl.style.opacity = '1';
+                counterEl.style.opacity = '1';
+            } catch (err) {
+                console.error('Error fetching status:', err);
+                statusEl.textContent = 'Error';
+                statusEl.classList.remove('loading');
+                counterEl.textContent = 'Could not load status.';
+                counterEl.classList.remove('loading');
+            }
         }
 
-        // Fetch current status and counter when page loads
+        function tick() {
+            return new Promise(resolve => setTimeout(resolve, 180));
+        }
+
+        // Load current status on page mount
         getStatus();
     </script>
 </body>
