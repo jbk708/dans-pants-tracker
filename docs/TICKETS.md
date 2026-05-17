@@ -40,10 +40,10 @@
 
 ### New Features
 
-- **T-07:** Streak visualization
+- ~~**T-07:** Streak visualization — PR #7~~
   Small calendar heatmap or flame counter showing the current consecutive-days streak visually.
 
-- **T-08:** Multiple user support
+- ~~**T-08:** Multiple user support — PR #7~~
   Track which household member logged the status. Optional: add a name input or account selector.
 
 ---
