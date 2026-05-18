@@ -4,14 +4,11 @@
     "description": "Asking the important questions, such as if Dan is wearing pants or shorts today.",
     "main": "index.js",
     "scripts": {
-        "db:init": "node -e \"const db = require('./lib/db'); db.getClient().then(() => console.log('DB initialized')).catch(e => console.error(e));\"",
+        "db:init": "node -e \"const db = require('./lib/db'); db.getStatus().then(() => console.log('DB initialized')).catch(e => console.error(e));\"",
         "dev": "netlify dev",
         "test": "vitest run"
     },
-    "dependencies": {
-        "@libsql/client": "^0.14.0",
-        "@libsql/linux-x64-gnu": "^0.4.4"
-    },
+    "dependencies": {},
     "devDependencies": {
         "netlify-cli": "^17.0.0",
         "vitest": "^4.1.6"
