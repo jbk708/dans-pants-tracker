@@ -1,2 +1,5 @@
 [functions]
 node_bundler = "esbuild"
+
+[functions._]
+included_files = ["node_modules/@libsql/linux-x64-gnu/**/*"]
