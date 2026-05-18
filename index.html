@@ -619,13 +619,8 @@
             <div class="card-title">Dan's Pants Tracker</div>
         </div>
         <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">☾ Dark</button>
-        <div class="question" id="question">Is Dan wearing pants?</div>
-        <div class="status-spinner" id="status-spinner">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-        </div>
         <div id="status" class="loading">—</div>
+        <div id="reported-by" class="reported-by">Reported by: <span id="reporter-name"></span></div>
         <div id="status-skeleton" class="skeleton"></div>
         <div id="streak" class="loading"></div>
         <div id="streak-skeleton" class="skeleton"></div>
@@ -650,7 +645,7 @@
                 </div>
             </div>
         </div>
-        <div class="reported-by" id="reported-by"></div>
+        
         <div class="user-name-footer">
             <input type="text" id="user-name" placeholder="Your name" maxlength="30" autocomplete="off">
         </div>
@@ -721,20 +716,16 @@
                 const dayLabel = days === 1 ? 'day' : 'days';
 
                 if (data.status === 'Pants') {
-                    statusEl.textContent = 'Pants';
-                    streakEl.textContent = userName
-                        ? `${userName} has been wearing pants for ${days} ${dayLabel} in a row`
-                        : `Wearing pants for ${days} ${dayLabel} in a row`;
+                    statusEl.textContent = 'Dan is wearing pants';
+                    streakEl.textContent = `Wearing pants for ${days} ${dayLabel} in a row`;
                 } else {
-                    statusEl.textContent = 'Shorts';
-                    streakEl.textContent = userName
-                        ? `${userName} is not wearing pants today — ${days} ${dayLabel} since pants`
-                        : `Not wearing pants — ${days} ${dayLabel} since pants`;
+                    statusEl.textContent = 'Dan is wearing shorts';
+                    streakEl.textContent = `Not wearing pants — ${days} ${dayLabel} since pants`;
                 }
 
                 // Reported by
-                const reportedByEl = document.getElementById('reported-by');
-                reportedByEl.textContent = userName ? `Reported by ${userName}` : '';
+                const reportedByEl = document.getElementById('reporter-name');
+                reportedByEl.textContent = userName || '???';
 
                 // Fade in
                 statusEl.classList.remove('loading');
