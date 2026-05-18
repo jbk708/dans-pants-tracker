@@ -78,27 +78,51 @@
         }
 
         .card-title {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-muted);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
             transition: color 0.3s ease;
         }
 
-        /* User name input */
+        .reported-by {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 20px;
+            text-align: center;
+            transition: color 0.3s ease;
+            min-height: 20px;
+        }
+
+        .user-name-footer {
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
         #user-name {
             font-family: 'Inter', system-ui, sans-serif;
             font-size: 12px;
             font-weight: 500;
             color: var(--text-secondary);
-            background: var(--counter-bg);
-            border: 1px solid transparent;
-            border-radius: 20px;
-            padding: 4px 12px;
-            width: 120px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 2px 8px;
+            width: 140px;
             text-align: center;
-            transition: background 0.3s ease, color 0.3s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.15s ease;
         }
 
         #user-name::placeholder {
@@ -107,8 +131,7 @@
 
         #user-name:focus {
             outline: none;
-            border-color: #6b7280;
-            box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.15);
+            border-bottom-color: #6b7280;
         }
 
         .btn-theme {
@@ -592,11 +615,11 @@
 </head>
 <body>
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="flex-direction: column; gap: 4px; margin-bottom: 0;">
             <div class="card-title">Dan's Pants Tracker</div>
-            <input type="text" id="user-name" placeholder="Your name" maxlength="30" autocomplete="off">
         </div>
         <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">☾ Dark</button>
+        <div class="question" id="question">Is Dan wearing pants?</div>
         <div class="status-spinner" id="status-spinner">
             <span class="dot"></span>
             <span class="dot"></span>
@@ -604,11 +627,9 @@
         </div>
         <div id="status" class="loading">—</div>
         <div id="status-skeleton" class="skeleton"></div>
-        <div id="counter" class="loading"></div>
-        <div id="counter-skeleton" class="skeleton"></div>
         <div id="streak" class="loading"></div>
         <div id="streak-skeleton" class="skeleton"></div>
-        <div id="counter-error" class="inline-error"></div>
+        <div id="error" class="inline-error"></div>
         <div class="buttons">
             <button class="btn btn-pants" onclick="setStatus('Pants')">Pants</button>
             <button class="btn btn-shorts" onclick="setStatus('Shorts')">Shorts</button>
@@ -628,6 +649,10 @@
                     <button class="btn-page" id="btn-next" onclick="nextPage()">Next</button>
                 </div>
             </div>
+        </div>
+        <div class="reported-by" id="reported-by"></div>
+        <div class="user-name-footer">
+            <input type="text" id="user-name" placeholder="Your name" maxlength="30" autocomplete="off">
         </div>
     </div>
 
@@ -658,7 +683,7 @@
                 await getStatus();
             } catch (err) {
                 console.error('Error updating status:', err);
-                showInlineError('counter-error', 'Failed to update status. Please try again.');
+                showInlineError('error', 'Failed to update status. Please try again.');
             } finally {
                 buttons.forEach(b => {
                     b.disabled = false;
@@ -669,18 +694,15 @@
 
         async function getStatus() {
             const statusEl = document.getElementById('status');
-            const counterEl = document.getElementById('counter');
             const streakEl = document.getElementById('streak');
             const statusSkeleton = document.getElementById('status-skeleton');
-            const counterSkeleton = document.getElementById('counter-skeleton');
             const streakSkeleton = document.getElementById('streak-skeleton');
             const spinner = document.getElementById('status-spinner');
-            const errorEl = document.getElementById('counter-error');
+            const errorEl = document.getElementById('error');
 
             // Show skeleton loaders
             spinner.classList.add('active');
             statusEl.style.opacity = '0';
-            counterEl.style.opacity = '0';
             streakEl.style.opacity = '0';
             errorEl.classList.remove('active');
             errorEl.textContent = '';
@@ -690,46 +712,48 @@
             try {
                 const data = await apiCall('/.netlify/functions/getStatus');
 
-                // Hide skeleton, show content
                 spinner.classList.remove('active');
                 statusSkeleton.classList.remove('active');
-                counterSkeleton.classList.remove('active');
                 streakSkeleton.classList.remove('active');
 
-                statusEl.textContent = data.status;
                 const userName = localStorage.getItem('userName') || '';
-                counterEl.textContent = userName
-                    ? `${userName}: Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`
-                    : `Wearing ${data.status} for ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} in a row`;
-                streakEl.textContent = `🔥 ${data.consecutiveDays} day${data.consecutiveDays === 1 ? '' : 's'} streak`;
+                const days = data.consecutiveDays;
+                const dayLabel = days === 1 ? 'day' : 'days';
+
+                if (data.status === 'Pants') {
+                    statusEl.textContent = 'Pants';
+                    streakEl.textContent = userName
+                        ? `${userName} has been wearing pants for ${days} ${dayLabel} in a row`
+                        : `Wearing pants for ${days} ${dayLabel} in a row`;
+                } else {
+                    statusEl.textContent = 'Shorts';
+                    streakEl.textContent = userName
+                        ? `${userName} is not wearing pants today — ${days} ${dayLabel} since pants`
+                        : `Not wearing pants — ${days} ${dayLabel} since pants`;
+                }
+
+                // Reported by
+                const reportedByEl = document.getElementById('reported-by');
+                reportedByEl.textContent = userName ? `Reported by ${userName}` : '';
 
                 // Fade in
                 statusEl.classList.remove('loading');
-                counterEl.classList.remove('loading');
                 streakEl.classList.remove('loading');
                 statusEl.style.opacity = '1';
-                counterEl.style.opacity = '1';
                 streakEl.style.opacity = '1';
             } catch (err) {
                 console.error('Error fetching status:', err);
                 spinner.classList.remove('active');
                 statusSkeleton.classList.remove('active');
-                counterSkeleton.classList.remove('active');
                 streakSkeleton.classList.remove('active');
 
-                statusEl.textContent = '—';
+                statusEl.textContent = '?';
                 statusEl.classList.remove('loading');
                 statusEl.style.opacity = '1';
 
-                counterEl.textContent = '';
-                counterEl.classList.remove('loading');
-                counterEl.style.opacity = '1';
-
-                streakEl.textContent = '';
+                streakEl.textContent = 'Could not load status';
                 streakEl.classList.remove('loading');
                 streakEl.style.opacity = '1';
-
-                showInlineError('counter-error', 'Could not load status. Please refresh to try again.');
             }
         }
 
