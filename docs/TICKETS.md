@@ -5,69 +5,46 @@
 ## Completed
 
 - **T-A:** Airtable → Turso migration (PR #1)
+- **T-01–T-08:** UI overhaul, mobile, history, dark mode, streak viz, multi-user (PRs #3–#7)
+- **T-09–T-12:** Tests, types, cleanup, README (PR #8)
 
 ---
 
-## P1 — Current
+## Sprint 3 — Historical Stats
 
-### UI Overhaul
+### Dashboard
 
-- ~~**T-01:** Redesign index.html — PR #3~~
-  Replace minimal inline styles with a clean, modern UI. Larger status text, better fonts, subtle shadows and spacing.
+- **T-13:** Stats dashboard view
+  Build a `/stats` page showing aggregate data: total days logged, longest streak, most-active user, fire rate over time.
 
-- ~~**T-02:** Add visual feedback — PR #3~~
-  Animate status transitions. Button press effects and hover states. Smooth fade or scale on state change.
+- **T-14:** Weekly/monthly summary cards
+  Compact summary blocks above the history list. Show "X days fire this week" and "Y day streak".
 
-- ~~**T-03:** Mobile responsiveness — PR #4~~
-  Buttons and text readable on small screens. Touch-friendly tap targets.
+### Visualization
 
-### Core Features
+- **T-15:** Streak timeline chart
+  A horizontal timeline or bar chart showing fire/no-fire days over the last 30–90 days. Built with a lightweight lib or inline SVG.
 
-- ~~**T-04:** Status history view — PR #5~~
-  Paginated list of past status changes — who, what, when. Fetch via a new GET /history endpoint.
+- **T-16:** Per-user breakdown
+  Filter stats and charts by household member. Show who has the longest current streak, most fires, etc.
 
----
+### Export
 
-## P2 — Next
-
-### UX Improvements
-
-- ~~**T-05:** Dark mode — PR #6~~
-  System-preference-aware dark/light theme toggle. Persist preference in localStorage.
-
-- ~~**T-06:** Better loading and error states — PR #6~~
-  Skeleton or spinner while fetching. Clear error messages on failure (no more raw "Failed to fetch status").
-
-### New Features
-
-- ~~**T-07:** Streak visualization — PR #7~~
-  Small calendar heatmap or flame counter showing the current consecutive-days streak visually.
-
-- ~~**T-08:** Multiple user support — PR #7~~
-  Track which household member logged the status. Optional: add a name input or account selector.
+- **T-17:** CSV/JSON export
+  Add an export button on the history page to download all records as a CSV or JSON file.
 
 ---
 
 ## P3 — Backlog
 
-### Quality
-
-- ~~**T-09:** Add unit tests — PR #8~~
-  Test db.js validation logic and streak refresh behavior. Can use Vitest or Jest.
-
-- ~~**T-10:** Type safety for Netlify functions — PR #8~~
-  Add JSDoc or migrate functions to TypeScript. Type the request/response shapes.
-
-- ~~**T-11:** Remove dead code and old Airtable artifacts — PR #8~~
-  Any leftover airtable config, old env var names, or migration scripts that are no longer needed.
-
-- ~~**T-12:** Update README — PR #8~~
-  Reflect Turso migration, required env vars, and local dev setup steps.
+- **T-18:** Email or push notification when a fire streak is at risk (e.g., no log by EOD)
+- **T-19:** PWA / installable app with offline history view
+- **T-20:** Recurring calendar import (.ics) so fire days appear on a shared calendar
 
 ---
 
 ## Dependency Notes
 
-- T-04 (history endpoint) unblocks T-07 (streak viz)
-- T-01/T-02 (UI) should land before T-05 (dark mode) to avoid patching twice
-- T-11 (dead code cleanup) should run after all feature work settles
+- T-13 (stats dashboard) depends on T-04 (history endpoint — already shipped)
+- T-16 (per-user) depends on T-08 (multi-user support — already shipped)
+- T-17 (export) can land independently
