@@ -77,11 +77,12 @@ exports.handler = async (event, context) => {
             body: JSON.stringify(result),
         };
     } catch (error) {
-        // Validation errors → 400, everything else → 500
+        // Validation errors → 400, already-entered-today → 409, everything else → 500
         const isValidation = error.message.startsWith('Invalid status');
+        const isDuplicate  = error.message.includes('One update per day');
         console.error('Error in setStatus:', error.message);
         return {
-            statusCode: isValidation ? 400 : 500,
+            statusCode: isValidation ? 400 : isDuplicate ? 409 : 500,
             body: JSON.stringify({ error: error.message }),
         };
     }
