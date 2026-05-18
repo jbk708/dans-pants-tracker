@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@libsql/client": "^0.14.0",
-        "@libsql/linux-x64-gnu": "^0.14.0"
+        "@libsql/linux-x64-gnu": "^0.4.4"
     },
     "devDependencies": {
         "netlify-cli": "^17.0.0",
